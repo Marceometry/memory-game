@@ -45,8 +45,8 @@ export const PlayerStats = ({
               const translate = !shouldTranslate
                 ? 0
                 : align === 'right'
-                ? 8
-                : -8
+                ? 10
+                : -10
               return (
                 <CardItem translateValue={translate}>
                   <img src={item} draggable={false} />

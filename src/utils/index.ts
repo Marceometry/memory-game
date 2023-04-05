@@ -1,4 +1,4 @@
-import { QUANTITY_OF_PAIRS, images } from '../constants'
+import { images } from '../constants'
 
 export const shuffle = (array: any[]) =>
   array
@@ -6,10 +6,12 @@ export const shuffle = (array: any[]) =>
     .sort((a, b) => a.sort - b.sort)
     .map(({ value }) => value)
 
-export const getCards = (): Array<{ id: string; src: string }> => {
+export const getCards = (
+  quantityOfPairs: number
+): Array<{ id: string; src: string }> => {
   const shuffledImages = shuffle(images)
 
-  const cards = new Array(QUANTITY_OF_PAIRS)
+  const cards = new Array(quantityOfPairs)
     .fill('')
     .reduce((acc: string[], _, index) => {
       const src = shuffledImages[index]
@@ -21,5 +23,5 @@ export const getCards = (): Array<{ id: string; src: string }> => {
       return [...acc, ...ids]
     }, [])
 
-  return cards // shuffle(cards)
+  return shuffle(cards)
 }

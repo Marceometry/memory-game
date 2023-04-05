@@ -14,6 +14,15 @@ export const GlobalStyle = createGlobalStyle`
     color: #eee;
   }
 
+  a {
+    color: inherit;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
   button {
     border: none;
     background: none;

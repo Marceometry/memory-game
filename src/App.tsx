@@ -1,7 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { SHOW_CARD_TIMEOUT } from './constants'
-import { Card } from './components'
-import { getCards } from './utils'
+import { Card, PlayerStats } from './components'
+import { useGame } from './hooks'
 import {
   CardsContainer,
   FinishedGame,
@@ -10,107 +8,35 @@ import {
   GlobalStyle,
   Header,
 } from './styles'
-import { PlayerStats } from './components/PlayerStats'
-
-const cards = getCards()
-const gridColumns = Math.ceil(Math.sqrt(cards.length))
-
-type Player = { wins: number; cards: string[] }
-const playerInitialState = { wins: 0, cards: [] } as Player
-const playersInitialState = [playerInitialState, playerInitialState]
 
 export function App() {
-  const [players, setPlayers] = useState([...playersInitialState])
-  const [currentPlayer, setCurrentPlayer] = useState(0)
-  const [foundCards, setFoundCards] = useState<string[]>([])
-  const [openedCards, setOpenedCards] = useState<string[]>([])
+  const {
+    cards,
+    currentPlayer,
+    foundCards,
+    hasFinished,
+    openCard,
+    openedCards,
+    players,
+    resetGame,
+  } = useGame(15)
 
-  const hasFinished = useMemo(
-    () => foundCards.length === cards.length,
-    [foundCards.length]
-  )
-
-  const openCard = (id: string) => {
-    setOpenedCards((state) => [...state, id])
-  }
-
-  const closeCards = () => setOpenedCards([])
-
-  const checkCards = (id1: string, id2: string) => {
-    if (id1.split('-')[0] === id2.split('-')[0]) return true
-  }
-
-  const resetGame = () => {
-    setFoundCards([])
-    setPlayers((state) =>
-      state.map((item) => {
-        return {
-          ...item,
-          cards: [],
-        }
-      })
-    )
-  }
-
-  useEffect(() => {
-    if (openedCards.length > 2) return setOpenedCards([])
-    if (openedCards.length < 2) return
-
-    const hasFound = checkCards(openedCards[0], openedCards[1])
-    setTimeout(() => {
-      if (hasFound) {
-        setFoundCards((state) => [...state, ...openedCards])
-        setPlayers((state) =>
-          state.map((item, index) => {
-            if (index !== currentPlayer) return item
-            const playerCards = openedCards.map(
-              (item) => cards.find((card) => card.id === item)?.src || ''
-            )
-            return { ...item, cards: [...item.cards, ...playerCards] }
-          })
-        )
-      } else {
-        setCurrentPlayer((state) => (!state ? 1 : 0))
-      }
-      closeCards()
-    }, SHOW_CARD_TIMEOUT)
-  }, [openedCards])
-
-  useEffect(() => {
-    if (hasFinished) {
-      setPlayers((state) => {
-        return state.map((item, index) => ({
-          ...item,
-          wins:
-            index === 0 && item.cards.length > state[1].cards.length
-              ? item.wins + 1
-              : index === 1 && item.cards.length > state[0].cards.length
-              ? item.wins + 1
-              : item.wins,
-        }))
-      })
-    }
-  }, [hasFinished])
+  const gridColumns = Math.ceil(Math.sqrt(cards.length))
 
   return (
     <GameContainer>
       <GlobalStyle />
 
       <Header>
-        <PlayerStats
-          name='Jogador 1'
-          wins={players[0].wins}
-          cards={players[0].cards}
-          isCurrentPlayer={currentPlayer === 0}
-        />
-
-        <PlayerStats
-          align='right'
-          name='Jogador 2'
-          wins={players[1].wins}
-          cards={players[1].cards}
-          isCurrentPlayer={currentPlayer === 1}
-        />
+        {players.map((player, index) => (
+          <PlayerStats
+            name={`Jogador ${index + 1}`}
+            align={index === 1 ? 'right' : 'left'}
+            wins={player.wins}
+            cards={player.cards}
+            isCurrentPlayer={currentPlayer === index}
+          />
+        ))}
       </Header>
 
       {hasFinished ? (
@@ -134,7 +60,12 @@ export function App() {
       )}
 
       <Footer>
-        <span>Made by Marcelino Teixeira</span>
+        <span>
+          Feito por{' '}
+          <a href='https://github.com/Marceometry' target='_blank'>
+            Marcelino Teixeira
+          </a>
+        </span>
       </Footer>
     </GameContainer>
   )
