@@ -1,29 +1,22 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { SHOW_CARD_TIMEOUT } from './constants'
 import { Card } from './components'
+import { getCards } from './utils'
 import {
   CardsContainer,
+  FinishedGame,
   Footer,
   GameContainer,
   GlobalStyle,
   Header,
 } from './styles'
-import { shuffle } from './utils'
+import { PlayerStats } from './components/PlayerStats'
 
-const quantityOfPairs = 10
-const cards = new Array(quantityOfPairs)
-  .fill('')
-  .reduce((acc: string[], item: string, index) => {
-    const ids = [`${index + 1}-1`, `${index + 1}-2`]
-    return [...acc, ...ids]
-  }, [])
-
+const cards = getCards()
 const gridColumns = Math.ceil(Math.sqrt(cards.length))
-const shuffledCards = shuffle(cards)
 
-const playerInitialState = { wins: 0, cards: [] } as {
-  wins: number
-  cards: string[]
-}
+type Player = { wins: number; cards: string[] }
+const playerInitialState = { wins: 0, cards: [] } as Player
 const playersInitialState = [playerInitialState, playerInitialState]
 
 export function App() {
@@ -32,6 +25,11 @@ export function App() {
   const [foundCards, setFoundCards] = useState<string[]>([])
   const [openedCards, setOpenedCards] = useState<string[]>([])
 
+  const hasFinished = useMemo(
+    () => foundCards.length === cards.length,
+    [foundCards.length]
+  )
+
   const openCard = (id: string) => {
     setOpenedCards((state) => [...state, id])
   }
@@ -39,8 +37,19 @@ export function App() {
   const closeCards = () => setOpenedCards([])
 
   const checkCards = (id1: string, id2: string) => {
-    //////////////////////////////////// BUG INDEX 0
-    if (id1.charAt(0) === id2.charAt(0)) return true
+    if (id1.split('-')[0] === id2.split('-')[0]) return true
+  }
+
+  const resetGame = () => {
+    setFoundCards([])
+    setPlayers((state) =>
+      state.map((item) => {
+        return {
+          ...item,
+          cards: [],
+        }
+      })
+    )
   }
 
   useEffect(() => {
@@ -51,7 +60,6 @@ export function App() {
     setTimeout(() => {
       if (hasFound) {
         setFoundCards((state) => [...state, ...openedCards])
-        console.log(openedCards)
         setPlayers((state) =>
           state.map((item, index) => {
             if (index !== currentPlayer) return item
@@ -62,11 +70,11 @@ export function App() {
         setCurrentPlayer((state) => (!state ? 1 : 0))
       }
       closeCards()
-    }, 500)
+    }, SHOW_CARD_TIMEOUT)
   }, [openedCards])
 
   useEffect(() => {
-    if (foundCards.length === shuffledCards.length) {
+    if (hasFinished) {
       setPlayers((state) => {
         return state.map((item, index) => ({
           ...item,
@@ -78,54 +86,48 @@ export function App() {
               : item.wins,
         }))
       })
-      setTimeout(() => {
-        setFoundCards([])
-        setPlayers((state) =>
-          state.map((item) => {
-            return {
-              ...item,
-              cards: [],
-            }
-          })
-        )
-      }, 1000)
     }
-  }, [foundCards])
+  }, [hasFinished])
 
   return (
     <GameContainer>
       <GlobalStyle />
 
       <Header>
-        <div>
-          <h2 style={{ color: currentPlayer === 0 ? 'green' : '' }}>
-            Jogador 1
-          </h2>
-          <span>Vitórias: {players[0].wins}</span>
-          <div>{players[0].cards.join(' | ')}</div>
-        </div>
+        <PlayerStats
+          name='Jogador 1'
+          wins={players[0].wins}
+          cards={players[0].cards}
+          isCurrentPlayer={currentPlayer === 0}
+        />
 
-        <div>
-          <h2 style={{ color: currentPlayer === 1 ? 'green' : '' }}>
-            Jogador 2
-          </h2>
-          <span>Vitórias: {players[1].wins}</span>
-          <div>{players[1].cards.join(' | ')}</div>
-        </div>
+        <PlayerStats
+          name='Jogador 2'
+          wins={players[1].wins}
+          cards={players[1].cards}
+          isCurrentPlayer={currentPlayer === 1}
+        />
       </Header>
 
-      <CardsContainer gridColumns={gridColumns}>
-        {shuffledCards.map((card) => (
-          <Card
-            id={card}
-            key={card}
-            isOpen={openedCards.includes(card)}
-            wasFound={foundCards.includes(card)}
-            onClick={() => openCard(card)}
-            disabled={openedCards.length > 1}
-          />
-        ))}
-      </CardsContainer>
+      {hasFinished ? (
+        <FinishedGame>
+          <button onClick={resetGame}>Novo jogo</button>
+        </FinishedGame>
+      ) : (
+        <CardsContainer gridColumns={gridColumns}>
+          {cards.map((card) => (
+            <Card
+              key={card.id}
+              id={card.id}
+              src={card.src}
+              isOpen={openedCards.includes(card.id)}
+              wasFound={foundCards.includes(card.id)}
+              onClick={() => openCard(card.id)}
+              disabled={openedCards.length > 1}
+            />
+          ))}
+        </CardsContainer>
+      )}
 
       <Footer>
         <span>Made by Marcelino Teixeira</span>

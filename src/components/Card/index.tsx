@@ -2,7 +2,7 @@ import { CardContainer } from './styles'
 
 export type CardProps = {
   id: string
-  // src: string
+  src: string
   isOpen?: boolean
   wasFound?: boolean
   disabled?: boolean
@@ -11,6 +11,7 @@ export type CardProps = {
 
 export const Card = ({
   id,
+  src,
   isOpen,
   wasFound,
   onClick,
@@ -19,13 +20,12 @@ export const Card = ({
   const isDisabled = disabled || isOpen || wasFound
   return (
     <CardContainer
-      as={isDisabled ? 'span' : 'button'}
       isHidden={wasFound}
+      isOpen={isOpen}
       disabled={isDisabled}
       onClick={!isDisabled ? onClick : undefined}
     >
-      {/* <img src={src} alt='' /> */}
-      {isOpen ? id : ''}
+      {<img src={src} alt={id.split('-')[0]} draggable={false} />}
     </CardContainer>
   )
 }
