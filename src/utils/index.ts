@@ -7,10 +7,12 @@ export const shuffle = (array: any[]) =>
     .map(({ value }) => value)
 
 export const getCards = (): Array<{ id: string; src: string }> => {
+  const shuffledImages = shuffle(images)
+
   const cards = new Array(QUANTITY_OF_PAIRS)
     .fill('')
-    .reduce((acc: string[], item: string, index) => {
-      const src = images[index]
+    .reduce((acc: string[], _, index) => {
+      const src = shuffledImages[index]
       const id = index + 1
       const ids = [
         { src, id: `${id}-1` },
@@ -19,5 +21,5 @@ export const getCards = (): Array<{ id: string; src: string }> => {
       return [...acc, ...ids]
     }, [])
 
-  return shuffle(cards)
+  return cards // shuffle(cards)
 }

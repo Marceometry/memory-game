@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 
 export const GameContainer = styled.div`
-  width: 100vw;
+  width: 100%;
   height: 100vh;
   display: flex;
   align-items: center;
@@ -10,7 +10,7 @@ export const GameContainer = styled.div`
 `
 
 export const Header = styled.header`
-  width: 100vw;
+  width: 100%;
   padding: 3rem;
   padding-bottom: 1rem;
   display: flex;
@@ -19,8 +19,9 @@ export const Header = styled.header`
 `
 
 export const Footer = styled.footer`
-  width: 100vw;
+  width: 100%;
   padding: 2rem;
+  padding-top: 1rem;
   display: grid;
   place-items: center;
 `
@@ -34,6 +35,24 @@ export const CardsContainer = styled.main<CardsContainerProps>`
   display: grid;
   grid-template-columns: repeat(${({ gridColumns }) => gridColumns}, 1fr);
   gap: 1rem;
+  margin: 0.5rem;
+  padding: 0.5rem;
+  overflow: auto;
+
+  &::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+    background-color: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    background-color: #555;
+  }
+
+  &::-webkit-scrollbar-corner {
+    background-color: transparent;
+  }
 `
 
 export const FinishedGame = styled.div`

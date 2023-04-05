@@ -40,13 +40,13 @@ export const CardContainer = styled.button<CardContainerProps>`
     width: 100%;
     height: 100%;
     object-fit: cover;
+    background-color: white;
     opacity: 1;
     transition: opacity 0.3s;
+    user-select: none;
   }
 
   ${({ isOpen }) => (!isOpen ? flip : '')}
 
-  ${({ isHidden, disabled }) => {
-    return isHidden ? hidden : !disabled && hover
-  }}
+  ${({ isHidden, disabled }) => (isHidden ? hidden : !disabled && hover)}
 `

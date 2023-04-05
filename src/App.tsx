@@ -63,7 +63,10 @@ export function App() {
         setPlayers((state) =>
           state.map((item, index) => {
             if (index !== currentPlayer) return item
-            return { ...item, cards: [...item.cards, ...openedCards] }
+            const playerCards = openedCards.map(
+              (item) => cards.find((card) => card.id === item)?.src || ''
+            )
+            return { ...item, cards: [...item.cards, ...playerCards] }
           })
         )
       } else {
@@ -102,6 +105,7 @@ export function App() {
         />
 
         <PlayerStats
+          align='right'
           name='Jogador 2'
           wins={players[1].wins}
           cards={players[1].cards}
